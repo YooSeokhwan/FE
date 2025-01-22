@@ -29,7 +29,7 @@
           />
         </div>
         <button @click="handleLogin" class="submit-button">로그인</button>
-        <button @click="goToSignUp" class="signup-button">신규 담당자 등록</button>
+        <button @click="goToSignup" class="signup-button">신규 담당자 등록</button>
       </div>
     </div>
     <div class="back-button" @click="goBack">
@@ -43,6 +43,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { login } from '@/stores/login';
+import AdminSignupPage from './AdminSignupPage.vue';
 
 const email = ref('');
 const password = ref('');
@@ -82,6 +83,10 @@ async function handleLogin() {
 
 function goBack() {
   router.push({ name: 'home' });
+}
+
+function goToSignup() {
+  router.push('/signup')
 }
 
 </script>
@@ -211,7 +216,7 @@ label {
 
 .back-button {
   position: absolute;
-  bottom: 20px;
+  bottom: 70px;
   right: 20px;
   width: 50px;
   height: 50px;
