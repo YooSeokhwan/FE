@@ -1,15 +1,13 @@
 <template>
     <div :class="['weather-container', backgroundClass]">
-      <!-- 날씨 관련 내용 (예: 배경 이미지 설정 등) -->
+  
     </div>
   </template>
   
   <script setup>
   import { ref } from 'vue';
   
-  const backgroundClass = ref('clearD'); // 날씨별 배경을 위한 클래스
-  // 날씨 관련 데이터 처리 (예: fetchWeather 등)
-  // 예시로 weatherManager에서 데이터를 받아오게 할 수 있습니다.
+  const backgroundClass = ref('clearD');
   
   </script>
   

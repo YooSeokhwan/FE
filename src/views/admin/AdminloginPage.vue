@@ -42,8 +42,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
-import { login } from '@/stores/login'; // login.js import
-// import { logout } from '@/stores/logout'; // logout.js import
+import { login } from '@/stores/login';
 
 const email = ref('');
 const password = ref('');
@@ -56,16 +55,9 @@ async function handleLogin() {
   }
 
   try {
-    console.log('관리자 로그인 요청 데이터:', { email: email.value, password: password.value });
-
-    // login.js의 adminLogin 호출
     const token = await login('admin', { email: email.value.trim(), password: password.value.trim() });
-    console.log('Admin 토큰 저장 완료:', token);
 
     if (token) {
-      //localStorage.setItem('admin_token', token); // 토큰 저장
-
-      // 토큰 검증
       const response = await axios.post(
         'http://localhost:8080/auth/validate',
         {},
@@ -77,35 +69,22 @@ async function handleLogin() {
       );
 
       if (response.status === 200) {
-       // showPopupMessage('🎉 로그인 성공! 환영합니다!', 'success');
-       alert('🎉 로그인 성공! 관리자 페이지로 이동합니다.'); 
-       router.push({ name: 'admin' }); // 보호된 페이지로 이동
+        alert('🎉 로그인 성공! 관리자 페이지로 이동합니다.');
+        router.push({ name: 'admin' });
       }
     } else {
       throw new Error('로그인 성공했지만 토큰이 없습니다.');
     }
   } catch (error) {
     console.error('로그인 처리 중 오류:', error.message);
-    // showPopupMessage(`❌ 로그인 실패: ${error.response?.data?.error || '서버 오류'}`, 'error');
   }
-
-  //   alert('🎉 로그인 성공! 관리자 페이지로 이동합니다.');
-  //   router.push('/admin'); // 관리자 보호 페이지로 이동
-  // } catch (error) {
-  //   console.error('로그인 실패:', error.message);
-  //   alert(`❌ 로그인 실패: ${error.message}`);
-  // }
 }
 
-// function handleLogout() {
-//   logout('admin'); // Logout.js 호출 (admin 로그아웃)
-//   alert('로그아웃되었습니다.');
-//   router.push('/'); // 홈 페이지로 이동
-// }
+function goBack() {
+  router.push({ name: 'home' });
+}
+
 </script>
-
-
-
 
 <style scoped>
 .container {
@@ -230,7 +209,6 @@ label {
   box-shadow: 0 3px 10px rgba(40, 167, 69, 0.4);
 }
 
-/* 뒤로가기 버튼 */
 .back-button {
   position: absolute;
   bottom: 20px;

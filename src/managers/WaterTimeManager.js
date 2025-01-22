@@ -8,7 +8,6 @@ if (!waterStartTime || !waterEndTime) {
   console.error('waterStartTime 또는 waterEndTime이 정의되지 않았습니다!');
 }
 
-// 현재 시간이 Water Time 범위에 있는지 확인
 export const checkWaterTime = () => {
   const currentTime = new Date();
   const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
@@ -22,25 +21,25 @@ export const checkWaterTime = () => {
   if (currentMinutes >= startMinutes && currentMinutes <= endMinutes) {
     if (!isWaterTime.value) {
       console.log('WaterTime 시작됨');
-      isWaterTime.value = true; // Water Time 활성화
-      hasGivenWater = false; // 새로운 주기에서는 물을 다시 줘야 함
+      isWaterTime.value = true;
+      hasGivenWater = false;
     }
   } else {
     if (isWaterTime.value) {
       console.log('WaterTime 종료됨');
-      isWaterTime.value = false; // Water Time 비활성화
-      hasGivenWater = false; // 상태 초기화
+      isWaterTime.value = false;
+      hasGivenWater = false;
     }
   }
 };
 
 export const startWaterTimeInterval = () => {
-  checkWaterTime(); // 초기 상태 확인
-  setInterval(checkWaterTime, 1000 * 60); // 1분 간격으로 상태 체크
+  checkWaterTime();
+  setInterval(checkWaterTime, 1000 * 60);
 };
 
 export const resetWaterTime = () => {
   console.log('WaterTime 상태 초기화');
   isWaterTime.value = false;
-  hasGivenWater = true; // 물을 준 상태로 설정
+  hasGivenWater = true;
 };

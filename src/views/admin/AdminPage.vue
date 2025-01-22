@@ -2,23 +2,15 @@
   <div>
     <h1>Mooluck</h1>
     <div>담당 독거노인 현황입니다.</div>
-
-    <!-- 우상단 아이콘 버튼 -->
     <div class="button-container">
       <button class="btn btn-outline-secondary icon-button" @click="openSettings">
         <i class="bi bi-gear"></i>
       </button>
     </div>
-
-    <!-- 차트 영역 -->
     <div class="chart-container">
       <canvas id="interactionBarChart"></canvas>
     </div>
-
-    <!-- 노인 회원가입 버튼 -->
     <button @click="openRegisterModal">노인 회원가입</button>
-
-    <!-- 회원가입 모달 -->
     <div v-if="showRegisterModal" class="modal">
       <div class="modal-content">
         <h2>노인 회원가입</h2>
@@ -31,8 +23,6 @@
         <button @click="closeRegisterModal">취소</button>
       </div>
     </div>
-
-    <!-- 테이블 영역 -->
     <table class="data-table">
       <thead>
         <tr>
@@ -98,7 +88,6 @@ import Chart from 'chart.js/auto'
 import { ref, onMounted, watch } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
-// import { login } from '@/stores/login';
 import { logout } from '@/stores/logout';
 
 const records = ref([])
@@ -113,39 +102,31 @@ const newElder = ref({
 
 const editIndex = ref(null)
 let barChart = null
-// let chart = null
 const router = useRouter();
 const ADMIN_TOKEN_KEY = 'admin_token';
 const chartContainer = 'interactionBarChart';
 
-const staffId = localStorage.getItem('staff_id'); // 로컬스토리지에서 staff_id 가져오기
+const staffId = localStorage.getItem('staff_id');
 if (!staffId) {
   alert('⚠️ 관리자 정보를 불러올 수 없습니다. 다시 로그인해주세요.');
   router.push('/login');
   throw new Error('staff_id가 없습니다. 다시 로그인하세요.');
 }
 
-// API 데이터 불러오기
 const fetchData = async (staffId) => {
   const token = localStorage.getItem(ADMIN_TOKEN_KEY);
 
   try {
-    console.log("관리자 staffId:", staffId);
-    console.log("관리자 token:", token);
     const response = await axios.get(`http://localhost:8080/admin/table?staffId=${staffId}`, {
       headers: {
-        Authorization: `Bearer ${token}`, // Bearer 토큰 전달
+        Authorization: `Bearer ${token}`,
       },
     });
 
-    console.log("API 호출 성공:");
-    console.log("API 응답 데이터:", response.data);
-
-    console.log('API 응답 데이터:', response.data); // 응답 데이터 구조 확인
 
     const data = response.data.response.data;
     records.value = data.map((item) => ({
-      elderId: item.elderId, // elderId 추가
+      elderId: item.elderId,
       elderName: item.elderName,
       elderAddress: item.elderAddress,
       elderNumber: item.elderNumber,
@@ -178,10 +159,9 @@ const closeRegisterModal = () => {
 
 const registerElder = async () => {
   try {
-    // staff_id를 newElder에 포함
     const elderData = {
       ...newElder.value,
-      staffId: parseInt(staffId, 10) // 로컬스토리지의 문자열 -> 숫자 10진수
+      staffId: parseInt(staffId, 10)
     };
 
     console.log(elderData);
@@ -189,14 +169,13 @@ const registerElder = async () => {
     await axios.post('http://localhost:8080/admin/elder/signup', elderData);
     alert('노인 등록 성공');
     closeRegisterModal();
-    fetchData(staffId); // 데이터 갱신
+    fetchData(staffId);
   } catch (error) {
     console.error('노인 등록 실패:', error);
     alert('노인 등록에 실패했습니다.');
   }
 };
 
-// 차트 그리기
 const drawBarChart = () => {
   const ctx = document.getElementById(chartContainer).getContext('2d');
   if (barChart) barChart.destroy();
@@ -232,11 +211,11 @@ const drawBarChart = () => {
   });
 };
 
-// Row 클릭 이벤트
+
 const rowClickHandler = (index) => {
   if (index >= 0 && index < records.value.length) {
     const record = records.value[index]
-    console.log(`Row clicked: ${record.elderId}`) // 디버그용 로그 추가
+    
     const ctx = document.getElementById(chartContainer).getContext('2d')
 
     if (barChart) barChart.destroy()
@@ -287,14 +266,7 @@ watch(
   { deep: true }
 )
 
-// 로그아웃
-// const logoutHandler = () => {
-//   logout('admin');
-//   alert('로그아웃되었습니다.');
-//   router.push('/login');
-// };
 
-// 컴포넌트 마운트 시 실행
 onMounted(async () => {
   const token = localStorage.getItem(ADMIN_TOKEN_KEY);
 
@@ -320,7 +292,7 @@ onMounted(async () => {
         throw new Error('유효하지 않은 토큰입니다.');
       }
 
-      console.log('토큰 검증 성공: 페이지 로드');
+    
     } catch (error) {
       console.error('토큰 검증 실패:', error.message);
       alert('세션이 만료되었습니다. 다시 로그인 해주세요.');
@@ -363,7 +335,6 @@ thead {
   background-color: #f2f2f2;
 }
 
-/* 우상단 아이콘 버튼 스타일 */
 .button-container {
   position: absolute;
   top: 20px;
