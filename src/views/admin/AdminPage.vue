@@ -1,14 +1,17 @@
 <template>
   <div>
     <h1>Mooluck</h1>
-    <!-- <div>담당 독거노인 현황입니다.</div> -->
-
-    <!-- 우상단 아이콘 버튼 -->
+    
     <div class="button-container">
       <button class="btn btn-outline-secondary icon-button" @click="openSettings">
         <i class="bi bi-gear"></i>
       </button>
     </div>
+
+    <div class="chart-container">
+      <canvas id="interactionBarChart"></canvas>
+    </div>
+    <button @click="openRegisterModal">노인 회원가입</button>
 
     <!-- 날짜 선택 / 전체 보기 버튼 -->
     <div class="filter-container">
@@ -38,8 +41,6 @@
         <button @click="closeRegisterModal">취소</button>
       </div>
     </div>
-
-    <!-- 테이블 영역 -->
     <table class="data-table">
       <thead>
         <tr>
@@ -74,7 +75,6 @@
             <input v-if="editIndex === index" v-model="record.elderNumber" />
             <span v-else>{{ record.elderNumber }}</span>
           </td>
-
           <td>
             <span
               :style="{ color: getStatusColor(record.status) }">
@@ -105,12 +105,11 @@ import Chart from 'chart.js/auto'
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
-// import { login } from '@/stores/login';
 import { logout } from '@/stores/logout';
 
-const allRecords = ref([]) // 전체 데이터
+const allRecords = ref([])
 const records = ref([]); // 현재 화면에 표시할 데이터
-const selectedDate = ref(null); // 선택된 날짜
+const selectedDate = ref(null);
 const today = new Date().toISOString().split('T')[0];
  
 const showRegisterModal = ref(false);
@@ -124,7 +123,6 @@ const newElder = ref({
 
 const editIndex = ref(null)
 let barChart = null
-// let chart = null
 const router = useRouter();
 const ADMIN_TOKEN_KEY = 'admin_token';
 const chartContainer = 'interactionBarChart';
@@ -132,30 +130,22 @@ const startEditing = (index) => {
   editIndex.value = index;
 };
 
-const staffId = localStorage.getItem('staff_id'); // 로컬스토리지에서 staff_id 가져오기
+const staffId = localStorage.getItem('staff_id');
 if (!staffId) {
-  alert('⚠️ 관리자 정보를 불러올 수 없습니다. 다시 로그인해주세요.');
+  alert('관리자 정보를 불러올 수 없습니다. 다시 로그인해주세요.');
   router.push('/login');
   throw new Error('staff_id가 없습니다. 다시 로그인하세요.');
 }
 
-// API 데이터 불러오기
 const fetchData = async (staffId) => {
   const token = localStorage.getItem(ADMIN_TOKEN_KEY);
 
   try {
-    console.log("관리자 staffId:", staffId);
-    console.log("관리자 token:", token);
     const response = await axios.get(`http://localhost:8080/admin/table?staffId=${staffId}`, {
       headers: {
-        Authorization: `Bearer ${token}`, // Bearer 토큰 전달
+        Authorization: `Bearer ${token}`,
       },
     });
-
-    console.log("API 호출 성공:");
-    console.log("API 응답 데이터:", response.data);
-
-    console.log('API 응답 데이터:', response.data); // 응답 데이터 구조 확인
 
     const data = response.data.response.data;
     allRecords.value = data.map((item) => ({
@@ -184,23 +174,21 @@ const fetchData = async (staffId) => {
   }
 }
 
-// 날짜 선택 시 필터링
+// 날짜 선택 필터링
 const filterDataByDate = () => {
   if (selectedDate.value) {
     records.value = allRecords.value.filter(
       (item) => item.lastCheckIn && item.lastCheckIn.startsWith(selectedDate.value)
     );
-    drawBarChart(); // 차트 업데이트
+    drawBarChart();
   }
 };
 
-// 전체 보기 버튼 클릭 시
+// 전체 버튼 
 const showAllData = () => {
-  records.value = allRecords.value; // 전체 데이터를 다시 표시
-  drawBarChart(); // 차트 업데이트
+  records.value = allRecords.value;
+  drawBarChart();
 };
-
-
 
 
 // 노인 등록하기
@@ -214,10 +202,9 @@ const closeRegisterModal = () => {
 
 const registerElder = async () => {
   try {
-    // staff_id를 newElder에 포함
     const elderData = {
       ...newElder.value,
-      staffId: parseInt(staffId, 10) // 로컬스토리지의 문자열 -> 숫자 10진수
+      staffId: parseInt(staffId, 10)
     };
 
     console.log(elderData);
@@ -225,7 +212,7 @@ const registerElder = async () => {
     await axios.post('http://localhost:8080/admin/elder/signup', elderData);
     alert('노인 등록 성공');
     closeRegisterModal();
-    fetchData(staffId); // 데이터 갱신
+    fetchData(staffId);
   } catch (error) {
     console.error('노인 등록 실패:', error);
     alert('노인 등록에 실패했습니다.');
@@ -315,11 +302,11 @@ const drawBarChart = () => {
   });
 };
 
-// Row 클릭 이벤트
+// 각 row에 대한 시간 차트
 const rowClickHandler = (index) => {
   if (index >= 0 && index < records.value.length) {
     const record = records.value[index]
-    console.log(`Row clicked: ${record.elderId}`) // 디버그용 로그 추가
+    
     const ctx = document.getElementById(chartContainer).getContext('2d')
 
     if (barChart) barChart.destroy()
@@ -362,7 +349,7 @@ const rowClickHandler = (index) => {
   }
 }
 
-// 상태 색 바꾸기
+// 상태(status) 색 바꾸기
 const getStatusColor = (status) => {
   switch (status) {
     case '양호':
@@ -376,14 +363,7 @@ const getStatusColor = (status) => {
   }
 };
 
-// 로그아웃
-// const logoutHandler = () => {
-//   logout('admin');
-//   alert('로그아웃되었습니다.');
-//   router.push('/login');
-// };
 
-// 컴포넌트 마운트 시 실행
 onMounted(async () => {
   const token = localStorage.getItem(ADMIN_TOKEN_KEY);
 
@@ -409,7 +389,7 @@ onMounted(async () => {
         throw new Error('유효하지 않은 토큰입니다.');
       }
 
-      console.log('토큰 검증 성공: 페이지 로드');
+    
     } catch (error) {
       console.error('토큰 검증 실패:', error.message);
       alert('세션이 만료되었습니다. 다시 로그인 해주세요.');
@@ -452,7 +432,6 @@ thead {
   background-color: #f2f2f2;
 }
 
-/* 우상단 아이콘 버튼 스타일 */
 .button-container {
   position: absolute;
   top: 20px;

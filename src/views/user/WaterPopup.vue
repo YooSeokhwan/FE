@@ -1,4 +1,3 @@
-<!-- src/components/WaterPopup.vue -->
 <template>
   <div class="water-popup" @click="$emit('close')">
     <p class="popup-title">💧물이 필요해요💧</p>
@@ -38,7 +37,6 @@ const emit = defineEmits(['close'])
 .popup-title {
   margin-bottom: 10px;
 }
-/* Fade In-Out Animation */
 @keyframes fadeInOut {
   0% {
     opacity: 0;

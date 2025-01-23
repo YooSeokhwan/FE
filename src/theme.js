@@ -1,4 +1,3 @@
-// src/theme.js
 export const theme = {
     colors: {
       background: '#fff8f0',

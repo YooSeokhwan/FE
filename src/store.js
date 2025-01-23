@@ -1,9 +1,8 @@
-// src/store.js
 import { reactive } from 'vue';
 
 export const store = reactive({
-  isAuthenticated: false, // 인증 상태
-  token: null,            // 토큰
+  isAuthenticated: false,
+  token: null,
   setAuthentication(token) {
     this.isAuthenticated = !!token;
     this.token = token;

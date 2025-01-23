@@ -1,11 +1,9 @@
-// src/managers/WeatherManager.js
 import { ref } from 'vue'
 import axios from 'axios'
 
 export const weatherDescription = ref('')
 export const backgroundClass = ref('')
 
-// 날씨 정보를 가져오는 함수
 export const fetchWeather = async () => {
   try {
     navigator.geolocation.getCurrentPosition(
@@ -27,7 +25,6 @@ export const fetchWeather = async () => {
   }
 }
 
-// 날씨 설명 가져오기
 const getWeatherDescription = (icon) => {
   const weatherMapping = {
     '01': 'Clear',
@@ -44,7 +41,6 @@ const getWeatherDescription = (icon) => {
   return weatherMapping[code] || 'Default'
 }
 
-// 배경 설정 함수
 const setBackground = (icon) => {
   const code = icon.slice(0, 2)
   const dayNight = icon.endsWith('d') ? 'D' : 'N'

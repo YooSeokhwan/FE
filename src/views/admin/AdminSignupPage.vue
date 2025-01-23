@@ -54,16 +54,6 @@
           placeholder="연락처 입력 (선택)"
         />
       </div>
-      <div class="form-group">
-        <label for="contact_period">연락 주기</label>
-        <input
-          v-model="contact_period"
-          type="number"
-          id="contact_period"
-          class="input"
-          placeholder="연락 주기 입력 (숫자)"
-        />
-      </div>
       <button @click="signUp" class="submit-button">회원가입</button>
     </div>
   </div>
