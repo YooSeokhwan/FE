@@ -8,11 +8,6 @@
       </button>
     </div>
 
-    <div class="chart-container">
-      <canvas id="interactionBarChart"></canvas>
-    </div>
-    <button @click="openRegisterModal">노인 회원가입</button>
-
     <!-- 날짜 선택 / 전체 보기 버튼 -->
     <div class="filter-container">
       <label>날짜 선택: </label>
@@ -89,6 +84,7 @@
           </td>
           <td>
             <button v-if="editIndex === index" @click.stop="updateRecord(index)">저장</button>
+            <button v-if="editIndex === index" @click.stop="cancelEditing()">취소</button>
             <button v-else @click.stop="startEditing(index)">수정</button>
             <button @click.stop="deleteRecord(index)">삭제</button>
           </td>
@@ -126,9 +122,6 @@ let barChart = null
 const router = useRouter();
 const ADMIN_TOKEN_KEY = 'admin_token';
 const chartContainer = 'interactionBarChart';
-const startEditing = (index) => {
-  editIndex.value = index;
-};
 
 const staffId = localStorage.getItem('staff_id');
 if (!staffId) {
@@ -149,7 +142,7 @@ const fetchData = async (staffId) => {
 
     const data = response.data.response.data;
     allRecords.value = data.map((item) => ({
-      elderId: item.elderId, // elderId 추가
+      elderId: item.elderId,
       elderName: item.elderName,
       elderAddress: item.elderAddress,
       elderNumber: item.elderNumber,
@@ -220,6 +213,15 @@ const registerElder = async () => {
 };
 
 // 노인 정보 수정
+const startEditing = (index) => {
+  editIndex.value = index;
+};
+
+const cancelEditing = () => {
+  editIndex.value = null;
+  fetchData(staffId);
+};
+
 const updateRecord = async (index) => {
   const record = records.value[index];
   try {
@@ -233,8 +235,8 @@ const updateRecord = async (index) => {
       },
     });
     alert('노인 정보가 수정되었습니다.');
-    editIndex.value = null; // 수정 모드 해제
-    await fetchData(staffId); // 데이터 새로고침
+    editIndex.value = null;
+    await fetchData(staffId);
   } catch (error) {
     console.error('수정 실패:', error);
     alert('노인 정보 수정에 실패했습니다.');
@@ -257,7 +259,7 @@ const deleteRecord = async (index) => {
       },
     });
     alert('노인 정보가 삭제되었습니다.');
-    await fetchData(staffId); // 데이터 새로고침
+    await fetchData(staffId);
   } catch (error) {
     console.error('삭제 실패:', error);
     alert('노인 정보 삭제에 실패했습니다.');

@@ -32,12 +32,6 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/interaction',
-    name: 'interaction',
-    component: () => import('@/views/user/MooluckInteractionPage.vue'),
-    meta: { requiresAuth: true }
-  },
-  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: NotFoundPage
