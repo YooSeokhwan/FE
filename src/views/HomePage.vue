@@ -28,8 +28,6 @@
         </div>
         <button class="submit-button" @click="handleLogin">확인</button>
       </div>
-
-      <!-- 커스텀 팝업 창 -->
       <div v-if="showPopup" :class="['popup', popupType]">
         <p>{{ popupMessage }}</p>
         <button @click="showPopup = false" class="popup-close">닫기</button>
@@ -57,27 +55,22 @@ const popupMessage = ref('');
 const popupType = ref('');
 const showPopup = ref(false);
 
-const ELDER_TOKEN_KEY = 'elder_token';
 
 async function handleLogin() {
-  console.log('로그인 요청 데이터:', { elderAccount: elderAccount.value, elderPwd: elderPwd.value });
-
   if (!elderAccount.value.trim() || !elderPwd.value.trim()) {
     showPopupMessage('⚠️ 아이디와 비밀번호를 모두 입력해 주세요!', 'warning');
     return;
   }
 
   try {
-    // 로그인 요청
     const token = await login('elder', {
       elderAccount: elderAccount.value.trim(),
       elderPwd: elderPwd.value.trim(),
     });
 
     if (token) {
-      localStorage.setItem('elder_token', token); // 토큰 저장
+      localStorage.setItem('elder_token', token);
 
-      // 토큰 검증
       const response = await axios.post(
         'http://localhost:8080/auth/validate',
         {},
@@ -101,27 +94,17 @@ async function handleLogin() {
   }
 }
 
-function handleLogout() {
-  localStorage.removeItem(ELDER_TOKEN_KEY); // 토큰 삭제
-  alert('로그아웃되었습니다.');
-  router.push('/'); // 홈 페이지로 리다이렉트
-}
 
 function showPopupMessage(message, type) {
   popupMessage.value = message;
   popupType.value = type;
   showPopup.value = true;
 
-  // 3초 후 팝업 자동 닫기
   setTimeout(() => {
     showPopup.value = false;
   }, 3000);
 }
 </script>
-
-
-
-
 
 <style scoped>
 .container {
@@ -133,11 +116,10 @@ function showPopupMessage(message, type) {
   align-items: center;
   justify-content: center;
   font-family: 'Roboto', Arial, sans-serif;
-  margin: 0; /* 공백 제거 */
-  padding: 0; /* 공백 제거 */
+  margin: 0;
+  padding: 0;
 }
 
-/* 배경 이미지 */
 .background {
   position: absolute;
   top: 0;
@@ -155,7 +137,6 @@ function showPopupMessage(message, type) {
   filter: blur(3px);
 }
 
-/* 콘텐츠 박스 */
 .content {
   z-index: 1;
   text-align: center;
@@ -171,7 +152,6 @@ function showPopupMessage(message, type) {
   align-items: center;
 }
 
-/* 타이틀 스타일 */
 .title {
   font-size: 2.5rem;
   font-weight: bold;
@@ -180,7 +160,6 @@ function showPopupMessage(message, type) {
   text-shadow: 2px 4px 6px rgba(0, 0, 0, 0.5);
 }
 
-/* 폼 스타일 */
 .form {
   width: 100%;
 }
@@ -222,18 +201,15 @@ label {
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  background-color: #e8b05c; /* 중간 톤의 부드러운 주황색 */
-  transition:
-    background-color 0.3s ease,
-    box-shadow 0.3s ease;
+  background-color: #e8b05c;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .submit-button:hover {
-  background-color: #f7b35f; /* 중간 톤보다 약간 진한 주황색 */
-  box-shadow: 0 3px 10px rgba(255, 167, 38, 0.5); /* 부드러운 주황빛 그림자 */
+  background-color: #f7b35f;
+  box-shadow: 0 3px 10px rgba(255, 167, 38, 0.5);
 }
 
-/* 에러 및 성공 메시지 */
 .error-message {
   margin-top: 1rem;
   color: #ff4c4c;
@@ -244,11 +220,10 @@ label {
   color: #4caf50;
 }
 
-/* 관리자 버튼 */
 .admin-login {
-  position: absolute; /* 컨테이너 안에 고정 */
-  bottom: 30px; /* 하단 여백 조정 */
-  right: 30px; /* 오른쪽 여백 조정 */
+  position: absolute;
+  bottom: 30px;
+  right: 30px;
   z-index: 10;
 }
 
@@ -263,19 +238,15 @@ label {
   color: white;
   cursor: pointer;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  transition:
-    transform 0.2s ease,
-    background-color 0.3s ease,
-    box-shadow 0.3s ease;
+  transition: transform 0.2s ease, background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .admin-button:hover {
-  background-color: #3a5a80; /* 약간 밝은 블루로 호버 효과 */
+  background-color: #3a5a80;
   transform: scale(1.1);
   box-shadow: 0 6px 12px rgba(58, 90, 128, 0.5);
 }
 
-/* 반응형 디자인 */
 @media (max-width: 768px) {
   .admin-button {
     width: 60px;
@@ -289,7 +260,6 @@ label {
   }
 }
 
-/* 팝업 스타일 */
 .popup {
   position: fixed;
   top: 50%;
@@ -305,16 +275,13 @@ label {
   color: #5d4037;
   max-width: 300px;
   width: 90%;
-  max-width: 300px;
 }
 
-/* 팝업 내용 */
 .popup p {
   margin-bottom: 1rem;
-  white-space: pre-wrap; /* 줄바꿈을 유지 */
+  white-space: pre-wrap;
 }
 
-/* 팝업 닫기 버튼 */
 .popup-close {
   padding: 0.5rem 1rem;
   border: none;
@@ -329,7 +296,6 @@ label {
   background-color: #ffb74d;
 }
 
-/* 팝업 유형에 따른 스타일 */
 .popup.success {
   border: 2px solid #4caf50;
 }

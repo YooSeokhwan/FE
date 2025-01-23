@@ -16,7 +16,6 @@
   </script>
   
   <style scoped>
-  /* 푸터 스타일 */
   .Footer {
     display: flex;
     justify-content: center;
@@ -24,17 +23,17 @@
     text-align: center;
     font-size: 0.9rem;
     color: #5d4037;
-    background-color: #ffe0b2; /* 푸터 배경색 */
-    position: fixed; /* 화면 하단 고정 */
+    background-color: #ffe0b2;
+    position: fixed;
     bottom: 0;
     left: 0;
     box-sizing: border-box;
-    width: 100%; /* 전체 화면 너비 */
+    width: 100%;
     height: 50px; 
   }
   
   .spacer {
-    margin: 0 0.5rem; /* 텍스트 사이 간격 */
+    margin: 0 0.5rem;
   }
   </style>
   

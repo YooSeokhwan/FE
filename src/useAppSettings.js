@@ -3,7 +3,7 @@ import { useRoute } from 'vue-router';
 import { pageTitles, adminRoutes, navigationLinks } from '@/config';
 import { theme } from '@/theme';
 import { messages } from '@/navigation';
-import { images } from '@/images'; // 여기에서 올바르게 import
+import { images } from '@/images';
 
 export function useAppSettings(language = 'ko') {
   const route = useRoute();
@@ -43,7 +43,7 @@ export function useAppSettings(language = 'ko') {
     headerColor,
     footerColor,
     navigationLinksList,
-    images, // 여기가 문제가 되었을 가능성
+    images,
     footerTextsList
   };
 }

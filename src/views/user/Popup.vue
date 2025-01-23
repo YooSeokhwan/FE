@@ -1,4 +1,3 @@
-<!-- src/components/Popup.vue -->
 <template>
     <div class="popup" @click="$emit('close')">
       <p>{{ message }}</p>
@@ -35,7 +34,6 @@
     animation: fadeInOut 5s forwards;
   }
   
-  /* Fade In-Out Animation */
   @keyframes fadeInOut {
     0% {
       opacity: 0;

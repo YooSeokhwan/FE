@@ -23,7 +23,7 @@ export const pageTitles = {
       { name: '홈', route: '/' },
       { name: '사용설명서', route: '/interaction' }
     ],
-    admin: [] // 관리자 페이지에서는 네비게이션 바 없음
+    admin: []
   };
   
   export const images = {
