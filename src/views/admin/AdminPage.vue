@@ -1,7 +1,7 @@
 <template>
   <div>
     <h1>Mooluck</h1>
-    <div>담당 독거노인 현황입니다.</div>
+    <!-- <div>담당 독거노인 현황입니다.</div> -->
 
     <!-- 우상단 아이콘 버튼 -->
     <div class="button-container">
@@ -10,13 +10,20 @@
       </button>
     </div>
 
+    <!-- 날짜 선택 / 전체 보기 버튼 -->
+    <div class="filter-container">
+      <label>날짜 선택: </label>
+      <input type="date" v-model="selectedDate" @change="filterDataByDate" />
+      <button @click="showAllData">전체</button>
+    </div>
+
     <!-- 차트 영역 -->
     <div class="chart-container">
       <canvas id="interactionBarChart"></canvas>
     </div>
 
-    <!-- 노인 회원가입 버튼 -->
-    <button @click="openRegisterModal">노인 회원가입</button>
+    <!-- 노인 신규 등록 버튼 -->
+    <button @click="openRegisterModal">노인 신규등록</button>
 
     <!-- 회원가입 모달 -->
     <div v-if="showRegisterModal" class="modal">
@@ -43,7 +50,7 @@
           <th>상태</th>
           <th>상호작용 횟수</th>
           <th>마지막 체크인</th>
-          <th>작업</th>
+          <th>노인정보 수정 및 삭제</th>
         </tr>
       </thead>
       <tbody>
@@ -53,8 +60,7 @@
           @click="rowClickHandler(index)"
         >
           <td>
-            <input v-if="editIndex === index" v-model="record.elderId" />
-            <span v-else>{{ record.elderId }}</span>
+            <span>{{ record.elderId }}</span>
           </td>
           <td>
             <input v-if="editIndex === index" v-model="record.elderName" />
@@ -70,20 +76,21 @@
           </td>
 
           <td>
-            <input v-if="editIndex === index" v-model="record.status" />
-            <span v-else>{{ record.status }}</span>
+            <span
+              :style="{ color: getStatusColor(record.status) }">
+              {{ record.status }}
+            </span>
           </td>
           <td>
-            <input v-if="editIndex === index" v-model="record.totalCount" type="number" />
-            <span v-else>{{ record.totalCount }}</span>
+            <span>{{ record.totalCount }}</span>
           </td>
           <td>
             <span>{{ record.lastCheckIn }}</span>
           </td>
           <td>
-            <button v-if="editIndex === index" @click="updateRecord(index)">저장</button>
-            <button v-else @click="startEditing(index)">수정</button>
-            <button @click="deleteRecord(index)">삭제</button>
+            <button v-if="editIndex === index" @click.stop="updateRecord(index)">저장</button>
+            <button v-else @click.stop="startEditing(index)">수정</button>
+            <button @click.stop="deleteRecord(index)">삭제</button>
           </td>
         </tr>
       </tbody>
@@ -95,13 +102,17 @@
 
 <script setup>
 import Chart from 'chart.js/auto'
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 // import { login } from '@/stores/login';
 import { logout } from '@/stores/logout';
 
-const records = ref([])
+const allRecords = ref([]) // 전체 데이터
+const records = ref([]); // 현재 화면에 표시할 데이터
+const selectedDate = ref(null); // 선택된 날짜
+const today = new Date().toISOString().split('T')[0];
+ 
 const showRegisterModal = ref(false);
 const newElder = ref({
   elderName: '',
@@ -117,6 +128,9 @@ let barChart = null
 const router = useRouter();
 const ADMIN_TOKEN_KEY = 'admin_token';
 const chartContainer = 'interactionBarChart';
+const startEditing = (index) => {
+  editIndex.value = index;
+};
 
 const staffId = localStorage.getItem('staff_id'); // 로컬스토리지에서 staff_id 가져오기
 if (!staffId) {
@@ -144,7 +158,7 @@ const fetchData = async (staffId) => {
     console.log('API 응답 데이터:', response.data); // 응답 데이터 구조 확인
 
     const data = response.data.response.data;
-    records.value = data.map((item) => ({
+    allRecords.value = data.map((item) => ({
       elderId: item.elderId, // elderId 추가
       elderName: item.elderName,
       elderAddress: item.elderAddress,
@@ -158,9 +172,11 @@ const fetchData = async (staffId) => {
       fourthInterval: item.fourthInterval,
     }));
 
-    if(!data) {
-      alert('노인 데이터가 없습니다.');
-    }
+    // records에 오늘 날짜 데이터만 필터링
+    records.value = allRecords.value.filter(
+      (item) => item.lastCheckIn && item.lastCheckIn.startsWith(today)
+    );
+    drawBarChart();
 
   } catch (error) {
     console.error('데이터 로드 실패:', error);
@@ -168,6 +184,26 @@ const fetchData = async (staffId) => {
   }
 }
 
+// 날짜 선택 시 필터링
+const filterDataByDate = () => {
+  if (selectedDate.value) {
+    records.value = allRecords.value.filter(
+      (item) => item.lastCheckIn && item.lastCheckIn.startsWith(selectedDate.value)
+    );
+    drawBarChart(); // 차트 업데이트
+  }
+};
+
+// 전체 보기 버튼 클릭 시
+const showAllData = () => {
+  records.value = allRecords.value; // 전체 데이터를 다시 표시
+  drawBarChart(); // 차트 업데이트
+};
+
+
+
+
+// 노인 등록하기
 const openRegisterModal = () => {
   showRegisterModal.value = true;
 };
@@ -195,6 +231,53 @@ const registerElder = async () => {
     alert('노인 등록에 실패했습니다.');
   }
 };
+
+// 노인 정보 수정
+const updateRecord = async (index) => {
+  const record = records.value[index];
+  try {
+    await axios.put(`http://localhost:8080/admin/elder/update/${record.elderId}`, {
+      elderName: record.elderName,
+      elderAddress: record.elderAddress,
+      elderNumber: record.elderNumber,
+    }, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem(ADMIN_TOKEN_KEY)}`,
+      },
+    });
+    alert('노인 정보가 수정되었습니다.');
+    editIndex.value = null; // 수정 모드 해제
+    await fetchData(staffId); // 데이터 새로고침
+  } catch (error) {
+    console.error('수정 실패:', error);
+    alert('노인 정보 수정에 실패했습니다.');
+  }
+};
+
+// 노인 정보 삭제 
+const deleteRecord = async (index) => {
+  const record = records.value[index];
+  const confirmDelete = confirm('정말로 삭제하시겠습니까?');
+  if (!confirmDelete) {
+    alert("삭제가 취소되었습니다.");
+    return;
+  }
+
+  try {
+    await axios.delete(`http://localhost:8080/admin/elder/delete/${record.elderId}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem(ADMIN_TOKEN_KEY)}`,
+      },
+    });
+    alert('노인 정보가 삭제되었습니다.');
+    await fetchData(staffId); // 데이터 새로고침
+  } catch (error) {
+    console.error('삭제 실패:', error);
+    alert('노인 정보 삭제에 실패했습니다.');
+  }
+};
+
+
 
 // 차트 그리기
 const drawBarChart = () => {
@@ -279,13 +362,19 @@ const rowClickHandler = (index) => {
   }
 }
 
-watch(
-  records,
-  () => {
-    if (records.value.length) drawBarChart()
-  },
-  { deep: true }
-)
+// 상태 색 바꾸기
+const getStatusColor = (status) => {
+  switch (status) {
+    case '양호':
+      return 'green';
+    case '경고':
+      return 'orange';
+    case '위험':
+      return 'red';
+    default:
+      return 'black';
+  }
+};
 
 // 로그아웃
 // const logoutHandler = () => {
